@@ -50,17 +50,16 @@ type TLSSettings struct {
 }
 
 type StreamSettings struct {
-	Network     string      `json:"network"`
-	Security    string      `json:"security"`
-	WSSettings  WSSettings  `json:"wsSettings"`
-	TLSSettings TLSSettings `json:"tlsSettings"`
+	Network     *string      `json:"network"`
+	Security    *string      `json:"security"`
+	WSSettings  *WSSettings  `json:"wsSettings"`
+	TLSSettings *TLSSettings `json:"tlsSettings"`
+	Sockopt     Sockopt      `json:"sockopt"`
 }
 
 type Outbound struct {
-	Protocol string `json:"protocol"`
-	Settings struct {
-		VNext []VNext `json:"vnext"`
-	} `json:"settings"`
+	Protocol       string         `json:"protocol"`
+	Settings       Settings       `json:"settings"`
 	StreamSettings StreamSettings `json:"streamSettings"`
 }
 
@@ -69,4 +68,21 @@ type XRay struct {
 	Inbounds  []Inbound  `json:"inbounds"`
 	Outbounds []Outbound `json:"outbounds"`
 	Other     struct{}   `json:"other"`
+}
+type Fragment struct {
+	Packets  string `json:"packets"`
+	Length   string `json:"length"`
+	Interval string `json:"interval"`
+}
+
+type Sockopt struct {
+	DialerProxy      string `json:"dialerProxy"`
+	TcpKeepAliveIdle uint64 `json:"tcpKeepAliveIdle"`
+	Mark             uint64 `json:"mark"`
+	TcpNoDelay       *bool  `json:"tcpNoDelay"`
+}
+
+type Settings struct {
+	VNext    *[]VNext  `json:"vnext"`
+	Fragment *Fragment `json:"fragment"`
 }

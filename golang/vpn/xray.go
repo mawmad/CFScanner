@@ -135,7 +135,12 @@ func XRayReceiver(configPath string) (string, int, error) {
 		return "", 0, err
 	}
 
-	defer xrayConfFile.Close()
+	defer func(xrayConfFile *os.File) {
+		err := xrayConfFile.Close()
+		if err != nil {
+
+		}
+	}(xrayConfFile)
 
 	var xrayConf map[string]interface{}
 	err = json.NewDecoder(xrayConfFile).Decode(&xrayConf)

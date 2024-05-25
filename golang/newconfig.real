@@ -1,0 +1,8 @@
+{
+	"id": "8b737a8d-2eb4-43fb-c538-5d17ee143877",
+	"host": "cdn.swapwise.store",
+	"port": "2083",
+	"path": "shock47760",
+	"serverName": "cdn.swapwise.store",
+	"subnetsList": "https://raw.githubusercontent.com/MortezaBashsiz/CFScanner/main/config/cf.local.iplist"
+}

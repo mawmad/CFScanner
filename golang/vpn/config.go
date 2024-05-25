@@ -49,6 +49,10 @@ func createInbound() []Inbound {
 	return configSlice
 }
 
+type handler struct {
+	is *bool
+}
+
 func createOutbound(C *configuration.Configuration, IP string) []Outbound {
 	vnextIP, _ := strconv.Atoi(C.Config.AddressPort)
 	streamUUID := uuid.New()
@@ -57,28 +61,35 @@ func createOutbound(C *configuration.Configuration, IP string) []Outbound {
 	hostname := substrings[1]
 
 	C.Config.Sni = fmt.Sprintf("%s.%s", streamUUID.String(), hostname)
-
+	h := handler{is: func() *bool { b := false; return &b }()}
+	newConf := Outbound{Protocol: "freedom", Settings: Settings{
+		VNext: nil,
+		Fragment: &Fragment{
+			Packets:  "tlshello",
+			Length:   "10-20",
+			Interval: "10-20",
+		},
+	}, StreamSettings: StreamSettings{
+		Network:     nil,
+		Security:    nil,
+		WSSettings:  nil,
+		TLSSettings: nil,
+		Sockopt: Sockopt{
+			TcpNoDelay:       h.is,
+			TcpKeepAliveIdle: 100,
+			Mark:             255,
+		},
+	}}
 	config := Outbound{
 		Protocol: "vmess",
-		Settings: struct {
-			VNext []VNext `json:"vnext"`
-		}{
-			VNext: []VNext{
-				{
-					Address: IP,
-					Port:    vnextIP,
-					Users: []User{
-						{
-							ID: C.Config.UserId,
-						},
-					},
-				},
-			},
+		Settings: Settings{
+			VNext:    &[]VNext{{Address: IP, Port: vnextIP, Users: []User{{ID: C.Config.UserId}}}},
+			Fragment: nil,
 		},
 		StreamSettings: StreamSettings{
-			Network:  "ws",
-			Security: "tls",
-			WSSettings: WSSettings{
+			Network:  StringPtr("ws"),
+			Security: StringPtr("tls"),
+			WSSettings: &WSSettings{
 				Headers: struct {
 					Host string `json:"Host"`
 				}{
@@ -86,13 +97,20 @@ func createOutbound(C *configuration.Configuration, IP string) []Outbound {
 				},
 				Path: C.Config.WsHeaderPath,
 			},
-			TLSSettings: TLSSettings{
+			TLSSettings: &TLSSettings{
 				ServerName:    C.Config.Sni,
 				AllowInsecure: false,
 			},
+			Sockopt: Sockopt{
+				DialerProxy:      "fragment",
+				TcpKeepAliveIdle: 100,
+				Mark:             255,
+			},
 		},
 	}
-	configSlice := []Outbound{config}
+
+	configSlice := []Outbound{newConf, config}
+
 	return configSlice
 }
 
@@ -136,4 +154,8 @@ func writeJSONToFile(jsonBytes []byte, filename string) error {
 	}
 
 	return nil
+}
+
+func StringPtr(s string) *string {
+	return &s
 }

@@ -276,6 +276,16 @@ func scan(Config *config.Configuration, worker *config.Worker, ip string) {
 		meanUploadLatency = utils.Mean(uploadLatency)
 	}
 
+	if upMeanJitter > 80.0 {
+		res = nil
+	}
+
+	if downMeanJitter > 100.0 {
+		res = nil
+	}
+	if res == nil {
+		return
+	}
 	// change download latency to string type for using it with saveResults func
 	var latencyDownloadString string
 	for _, f := range downLatencyInt {
